@@ -45,7 +45,8 @@ export function CloudSelector(props) {
       <Header />
       <div style={{ padding: "5vh" }}>
         <FilterClouds
-          setCloudProviders={setCloudProviders}
+          setBannedCloudProviders={setBannedCloudProviders}
+          bannedProviders={bannedProviders}
           cloudProviders={cloudProviders}
         />
         <AvailableClouds />
