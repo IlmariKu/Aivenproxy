@@ -1,7 +1,9 @@
 import * as React from "react";
+import { CloudSelector } from "./cloudselector/CloudSelector"
+import "./index.css";
 
 export default () => (
   <>
-    <h2>Empty project for coding-assignment</h2>
+    <CloudSelector />
   </>
 );
