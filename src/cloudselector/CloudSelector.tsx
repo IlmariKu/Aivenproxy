@@ -10,37 +10,33 @@ export function CloudSelector(props) {
   const [cloudProviders, setCloudProviders] = useState({});
   const [bannedProviders, setBannedCloudProviders] = useState([]);
 
+  function getCloudName(cloudName) {
+    return cloudName.slice(cloudName.indexOf("-") + 2, cloudName.indexOf(":"));
+  }
 
-function getCloudName(cloudName){
-    return cloudName.slice(
-        cloudName.indexOf("-") + 2,
-        cloudName.indexOf(":"),
-    )
-}
+  function getCloudAlias(cloudName) {
+    return cloudName.slice(0, cloudName.indexOf("-"));
+  }
 
-function getCloudAlias(cloudName){
-    return cloudName.slice(0, cloudName.indexOf("-"))
-}
-
-function parseCloudProviders(clouds){
-    const cloudProvs = {}
+  function parseCloudProviders(clouds) {
+    const cloudProvs = {};
     clouds.forEach((cloud) => {
-        const cloudAlias = getCloudAlias(cloud["cloud_name"])
-        if (!(cloudAlias in cloudProvs)){
-            cloudProvs[cloudAlias] = {
-                "name": getCloudName(cloud["cloud_description"])
-            }
-        }
-    })
-    setCloudProviders(cloudProvs)
-}
+      const cloudAlias = getCloudAlias(cloud["cloud_name"]);
+      if (!(cloudAlias in cloudProvs)) {
+        cloudProvs[cloudAlias] = {
+          name: getCloudName(cloud["cloud_description"]),
+        };
+      }
+    });
+    setCloudProviders(cloudProvs);
+  }
 
   useEffect(() => {
     // Using mock-data for now
-    if (mockClouds){
-    const clouds = mockClouds.clouds;
-    parseCloudProviders(clouds)
-    setAllClouds(clouds);
+    if (mockClouds) {
+      const clouds = mockClouds.clouds;
+      parseCloudProviders(clouds);
+      setAllClouds(clouds);
     }
   }, []);
 
