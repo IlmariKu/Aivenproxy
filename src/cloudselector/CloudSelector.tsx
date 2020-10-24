@@ -7,13 +7,32 @@ import { mockClouds } from "~/mockclouds.js";
 
 export function CloudSelector(props) {
   const [allClouds, setAllClouds] = useState([]);
-  const [cloudProviders, setCloudProviders] = useState();
+  const [cloudProviders, setCloudProviders] = useState({});
+  const [bannedProviders, setBannedCloudProviders] = useState([]);
+
+
+function getCloudName(cloudName){
+    return cloudName.slice(
+        cloudName.indexOf("-") + 2,
+        cloudName.indexOf(":"),
+    )
+}
+
+function getCloudAlias(cloudName){
+    return cloudName.slice(0, cloudName.indexOf("-"))
+}
 
 function parseCloudProviders(clouds){
-    const cloudProvds = {}
+    const cloudProvs = {}
     clouds.forEach((cloud) => {
-        console.log(cloud)
+        const cloudAlias = getCloudAlias(cloud["cloud_name"])
+        if (!(cloudAlias in cloudProvs)){
+            cloudProvs[cloudAlias] = {
+                "name": getCloudName(cloud["cloud_description"])
+            }
+        }
     })
+    setCloudProviders(cloudProvs)
 }
 
   useEffect(() => {
