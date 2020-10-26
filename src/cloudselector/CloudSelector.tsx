@@ -8,24 +8,29 @@ import { mockClouds } from "~/mockclouds.js";
 export function CloudSelector(props) {
   const [allClouds, setAllClouds] = useState([]);
   const [cloudProviders, setCloudProviders] = useState({});
-  const [bannedProviders, setBannedCloudProviders] = useState([]);
 
   function getCloudName(cloudName) {
     return cloudName.slice(cloudName.indexOf("-") + 2, cloudName.indexOf(":"));
   }
 
-  function getCloudAlias(cloudName) {
+  function getCloudProvider(cloudName) {
     return cloudName.slice(0, cloudName.indexOf("-"));
   }
 
   function parseCloudProviders(clouds) {
     const cloudProvs = {};
     clouds.forEach((cloud) => {
-      const cloudAlias = getCloudAlias(cloud["cloud_name"]);
+      const cloudAlias = getCloudProvider(cloud["cloud_name"]);
       if (!(cloudAlias in cloudProvs)) {
         cloudProvs[cloudAlias] = {
           name: getCloudName(cloud["cloud_description"]),
+          regions: [],
+          bannedRegions: []
         };
+      }
+      const region = cloud["geo_region"]
+      if (!(cloudProvs[cloudAlias]["regions"].includes(region))){
+        cloudProvs[cloudAlias]["regions"].push(region)
       }
     });
     setCloudProviders(cloudProvs);
@@ -45,11 +50,10 @@ export function CloudSelector(props) {
       <Header />
       <div style={{ padding: "5vh" }}>
         <FilterClouds
-          setBannedCloudProviders={setBannedCloudProviders}
-          bannedProviders={bannedProviders}
           cloudProviders={cloudProviders}
+          setCloudProviders={setCloudProviders}
         />
-        <AvailableClouds />
+        <AvailableClouds allClouds={allClouds} cloudProviders={cloudProviders}/>
       </div>
     </div>
   );

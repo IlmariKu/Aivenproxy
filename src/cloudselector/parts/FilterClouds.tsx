@@ -1,40 +1,55 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { pull } from "lodash";
 
 export function FilterClouds(props) {
   const [cloudButtons, setCloudButtons] = useState([]);
 
-  function createCloudButtons(clouds) {
-    const buttons = Object.keys(clouds).map((name) => {
+  function banUnbanProvider(clouds, provider, region) {
+    let newcloud = { ...clouds };
+    if (clouds[provider]["bannedRegions"].includes(region)) {
+      pull(clouds[provider]["bannedRegions"], region)
+    } else {
+      newcloud[provider]["bannedRegions"].push(region)
+    }
+    props.setCloudProviders(newcloud)
+  }
+
+  function createRegionTables(clouds) {
+    const cloudProviders = Object.keys(clouds);
+    return cloudProviders.map((provider) => {
+      return createTable(provider, clouds);
+    });
+  }
+
+  function createTable(providerName: string, clouds) {
+    const tableRows = clouds[providerName]["regions"].map((region) => {
       return (
-        <tr key={name}>
-          <td>{clouds[name].name}</td>
-          <td>
-            <CloudButton show={name === "aws"} key={name}>
-              {(name === "aws") ? "Yes" : "No"}
+        <div key={`${providerName}_${region}`}>
+          <>
+            <CloudButton
+              onClick={() => banUnbanProvider(clouds, providerName, region)}
+              banned={clouds[providerName]["bannedRegions"].includes(region)}
+              key={region}
+            >
+              {region}
             </CloudButton>
-          </td>
-        </tr>
+          </>
+        </div>
       );
     });
+
     return (
-      <StyledTable>
-        <table>
-          <tbody>
-            <tr>
-              <th>Cloud name</th>
-              <th>Show</th>
-            </tr>
-            {buttons}
-          </tbody>
-        </table>
-      </StyledTable>
+      <StyledRows>
+        <h3>{providerName}</h3>
+          {tableRows}
+      </StyledRows>
     );
   }
 
   useEffect(() => {
     if (props.cloudProviders) {
-      const cloudTable = createCloudButtons(props.cloudProviders);
+      const cloudTable = createRegionTables(props.cloudProviders);
       setCloudButtons(cloudTable);
     }
   }, [props.cloudProviders]);
@@ -42,18 +57,14 @@ export function FilterClouds(props) {
   return <div>{cloudButtons}</div>;
 }
 
-const StyledTable = styled.div`
-  th,
-  td {
-    padding-right: 35px;
-    padding-left: 35px;
-  }
+const StyledRows = styled.div`
+
 `;
 
 const CloudButton = styled.div`
-  height: 50px;
+  height: 25px;
   width: 200px;
-  background-color: ${(props) => (props.show ? "#01C610" : "#C60101")};
+  background-color: ${(props) => (props.banned ? "#C60101" : "#01C610")};
   border-radius: 15px;
   margin-top: 2vh;
   border: solid;
