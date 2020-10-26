@@ -8,18 +8,22 @@ export function FilterClouds(props) {
   function banUnbanProvider(clouds, provider, region) {
     let newcloud = { ...clouds };
     if (clouds[provider]["bannedRegions"].includes(region)) {
-      pull(clouds[provider]["bannedRegions"], region)
+      pull(clouds[provider]["bannedRegions"], region);
     } else {
-      newcloud[provider]["bannedRegions"].push(region)
+      newcloud[provider]["bannedRegions"].push(region);
     }
-    props.setCloudProviders(newcloud)
+    props.setCloudProviders(newcloud);
   }
 
   function createRegionTables(clouds) {
     const cloudProviders = Object.keys(clouds);
-    return cloudProviders.map((provider) => {
-      return createTable(provider, clouds);
-    });
+    return (
+      <StyledColumns>
+        {cloudProviders.map((provider) => {
+          return createTable(provider, clouds);
+        })}
+      </StyledColumns>
+    );
   }
 
   function createTable(providerName: string, clouds) {
@@ -40,10 +44,10 @@ export function FilterClouds(props) {
     });
 
     return (
-      <StyledRows>
-        <h3>{providerName}</h3>
-          {tableRows}
-      </StyledRows>
+      <div style={{ marginLeft: "4vh" }}>
+        <h3 style={{ textAlign: "center" }}>{providerName}</h3>
+        {tableRows}
+      </div>
     );
   }
 
@@ -57,8 +61,9 @@ export function FilterClouds(props) {
   return <div>{cloudButtons}</div>;
 }
 
-const StyledRows = styled.div`
-
+const StyledColumns = styled.div`
+  display: flex;
+  flex-direction: row;
 `;
 
 const CloudButton = styled.div`
