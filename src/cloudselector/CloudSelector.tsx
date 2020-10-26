@@ -4,18 +4,11 @@ import { Header } from "./parts/Header";
 import { FilterClouds } from "./parts/FilterClouds";
 import { AvailableClouds } from "./parts/AvailableClouds";
 import { mockClouds } from "~/mockclouds.js";
+import { getCloudProvider, getCloudName } from "~/src/cloudselector/utils/cloudnameparser";
 
 export function CloudSelector(props) {
   const [allClouds, setAllClouds] = useState([]);
   const [cloudProviders, setCloudProviders] = useState({});
-
-  function getCloudName(cloudName) {
-    return cloudName.slice(cloudName.indexOf("-") + 2, cloudName.indexOf(":"));
-  }
-
-  function getCloudProvider(cloudName) {
-    return cloudName.slice(0, cloudName.indexOf("-"));
-  }
 
   function parseCloudProviders(clouds) {
     const cloudProvs = {};
