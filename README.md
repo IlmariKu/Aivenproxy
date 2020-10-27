@@ -28,4 +28,5 @@
 - Something's missing with the babel-env configs and it shows in logs when running frontend
 - Base-urls would be in an ENV-file for backend- and frontend-builds.
 - I don't like the naming of bunch of frontend-variables, they're too generic to express what the code is really doing
+- Backend should do the first parsing of Aiven API, to sorted-by cloud provider
 - I'd make the UI more pretty
