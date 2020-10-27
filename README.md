@@ -22,3 +22,8 @@
 - Tests would be run (front & back)
 - Build frontend, push to Amazon S3 for deployment or build a reverse-proxy Nginx image for serving the files
 - Build backend-image, push to image-repository
+
+### Notes:
+- Project is Typescript-ready, but no type hints have been written.
+- Something's missing with the babel-env configs and it shows in logs when running frontend
+- I'd make the UI more pretty
