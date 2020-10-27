@@ -5,6 +5,7 @@ from typing import List, Dict
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 app = FastAPI()
 
 app.add_middleware(
@@ -28,3 +29,34 @@ def say_hello():
     res = requests.get("https://api.aiven.io/v1/clouds")
 
     return res.json()
+
+class CloudModel(BaseModel):
+    userLongitude: float
+    userLatitude: float
+    clouds: List
+
+
+@app.post("/sort_clouds_by_distance")
+def sort_clouds(sortClouds: CloudModel):
+
+    def get_distance(lat1: float, lon1: float, lat2: float, lon2: float):
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = (math.sin(dlat / 2) * math.sin(dlat / 2) +
+            math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+            math.sin(dlon / 2) * math.sin(dlon / 2))
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        d = round(6371 * c)
+        return d
+
+    myLat = sortClouds.userLatitude
+    myLon = sortClouds.userLongitude
+    cloud_list = sortClouds.clouds
+
+    for cloud in cloud_list:
+        distance = get_distance(myLat, myLon, cloud["geo_latitude"], cloud["geo_longitude"])
+        cloud["distance"] = distance
+
+    cloud_list = sorted(cloud_list, key = lambda i: i['distance'])
+
+    return {"clouds": cloud_list}
