@@ -34,6 +34,8 @@ def get_passed_arguments():
 def get_user_input():
     try:
         user_input = input()
+        if not user_input:
+            sys.exit(1)
         return int(user_input)
     except ValueError:
         print(user_input + " is not an integer!")
