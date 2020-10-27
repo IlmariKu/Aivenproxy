@@ -35,8 +35,8 @@ export function CloudSelector(props) {
     const clouds = await api_get(PROXY_URL)
     parseCloudProviders(clouds["clouds"]);
     setAllClouds(clouds["clouds"]);
+    setFilteredClouds(clouds["clouds"])
   }
-
 
   function isCloudLocationBanned(cloud){
     const cloudname = cloud["cloud_name"]
