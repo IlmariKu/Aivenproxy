@@ -1,7 +1,7 @@
 import os
 import requests
 import math
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,31 +15,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class Datacenter(BaseModel):
+    cloud_description: str
+    cloud_name: str
+    geo_region: str
+    geo_latitude: float
+    geo_longitude: float
+    distance: Optional[float]
+
+class CloudModel(BaseModel):
+    userLongitude: float
+    userLatitude: float
+    clouds: List[Datacenter]
 
 @app.get("/get_clouds")
-def say_hello():
+def get_all_clouds():
     """
-    Caching is not implemented, but as a production-app,
-    this proxy would cache responses, probably would use Redis
+    Get all clouds supported by Aiven from their public REST-API
     """
     caching_enabled = os.environ.get("CACHING_ENABLED", False)
-    if caching_enabled: # and result is in cache
-        pass # would return a cached response
+    if caching_enabled: # and if result is in cache
+        pass # would return a cached response here
 
     res = requests.get("https://api.aiven.io/v1/clouds")
 
     return res.json()
 
-class CloudModel(BaseModel):
-    userLongitude: float
-    userLatitude: float
-    clouds: List
-
 
 @app.post("/sort_clouds_by_distance")
 def sort_clouds(sortClouds: CloudModel):
 
-    def get_distance(lat1: float, lon1: float, lat2: float, lon2: float):
+    def calculate_cloud_distance_from_user(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        """
+            Calculates the distance between two points on earth's surface
+            given longitude/latitude of those points
+        """
         dlat = math.radians(lat2 - lat1)
         dlon = math.radians(lon2 - lon1)
         a = (math.sin(dlat / 2) * math.sin(dlat / 2) +
@@ -49,14 +59,20 @@ def sort_clouds(sortClouds: CloudModel):
         d = round(6371 * c)
         return d
 
-    myLat = sortClouds.userLatitude
-    myLon = sortClouds.userLongitude
+    def sort_clouds_by_nearest_distance(cloud_list: List[Datacenter]) -> List[Datacenter]:
+        return sorted(cloud_list, key = lambda i: i.distance)
+
+    userLatitude = sortClouds.userLatitude
+    userLongitude = sortClouds.userLongitude
     cloud_list = sortClouds.clouds
 
     for cloud in cloud_list:
-        distance = get_distance(myLat, myLon, cloud["geo_latitude"], cloud["geo_longitude"])
-        cloud["distance"] = distance
+        cloud.distance = calculate_cloud_distance_from_user(
+            userLatitude,
+            userLongitude,
+            cloud.geo_latitude,
+            cloud.geo_longitude
+            )
 
-    cloud_list = sorted(cloud_list, key = lambda i: i['distance'])
-
-    return {"clouds": cloud_list}
+    sorted_clouds = sort_clouds_by_nearest_distance(cloud_list)
+    return {"clouds": sorted_clouds}
