@@ -1,57 +1,50 @@
 import React, { useEffect, useState } from "react";
 import { isEmpty, sortBy } from "lodash";
 import styled from "styled-components";
+import { api_post } from "~/src/utils/api.ts";
+
+const PROXY_URL = "http://localhost/sort_clouds_by_distance";
 
 export function AvailableClouds(props) {
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const [sortByLocation, setSortByLocation] = useState(false);
-  const [cloudLocations, setCloudLocations] = useState([]);
+  const [dataCenterTable, setDataCenterTable] = useState([]);
   const [myLatitude, setMyLatitude] = useState(null);
   const [myLongitude, setMyLongitude] = useState(null);
 
   function successLocation(position) {
+    setLoading(true);
+    setErrorMessage("");
     setMyLatitude(position.coords.latitude);
     setMyLongitude(position.coords.longitude);
     setSortByLocation(!sortByLocation);
   }
 
-  function distanceTo(lat1, lon1, lat2, lon2) {
-    var radlat1 = (Math.PI * lat1) / 180;
-    var radlat2 = (Math.PI * lat2) / 180;
-    var theta = lon1 - lon2;
-    var radtheta = (Math.PI * theta) / 180;
-    var dist =
-      Math.sin(radlat1) * Math.sin(radlat2) +
-      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-    if (dist > 1) {
-      dist = 1;
-    }
-    dist = Math.acos(dist);
-    dist = (dist * 180) / Math.PI;
-    dist = dist * 60 * 1.1515;
-    return Math.round(dist * 1.609344);
-  }
-
-  function sortResultsByDistance(results, myLat, myLon) {
-    const resultsWithDistance = results.map((location) => {
-      location["distance"] = distanceTo(
-        myLat,
-        myLon,
-        location["geo_latitude"],
-        location["geo_longitude"]
-      );
-      return location;
-    });
-    return sortBy(resultsWithDistance, "distance");
-  }
-
   function denyLocation() {
-    console.error("Its not possible to fetch your location");
+    setLoading(false);
+    setErrorMessage(
+      <h4 style={{ color: "red" }}>
+        Error: Your location could not be fetched
+      </h4>
+    );
   }
 
-  function getUserLocation() {
+  function getUserCoordinates() {
+    setLoading(true);
     const geo = navigator.geolocation;
     geo.getCurrentPosition(successLocation, denyLocation);
+  }
+
+  async function calculateDistancesToGeoLocations(allClouds) {
+    const datacenters = await api_post(PROXY_URL, {
+      userLongitude: myLongitude,
+      userLatitude: myLatitude,
+      clouds: allClouds,
+    });
+    const locationRows = createLocationRows(datacenters.clouds);
+    setLoading(false);
+    setDataCenterTable(locationRows);
   }
 
   function createLocationRows(allTheClouds) {
@@ -68,45 +61,51 @@ export function AvailableClouds(props) {
     return (
       <CloudProvividerTable>
         <tbody>
-          <tr style={{"textAlign": "left"}}>
+          <tr style={{ textAlign: "left" }}>
             <th>Description</th>
             <th>Region name</th>
             <th>Distance</th>
           </tr>
           {allClouds}
-          </tbody>
+        </tbody>
       </CloudProvividerTable>
     );
   }
 
   useEffect(() => {
     if (!isEmpty(props.allClouds)) {
-      let rows;
+      let datacenters;
       if (sortByLocation) {
-        rows = createLocationRows(
-          sortResultsByDistance(props.allClouds, myLatitude, myLongitude)
-        );
+        calculateDistancesToGeoLocations(props.allClouds);
       } else {
-        rows = createLocationRows(props.allClouds);
+        datacenters = createLocationRows(props.allClouds);
+        setLoading(false);
+        setDataCenterTable(datacenters);
       }
-      setCloudLocations(rows);
     }
   }, [sortByLocation, props.allClouds]);
 
   return (
     <div style={{ marginTop: "10vh" }}>
-      <CheckboxStyle>
-        <input
-          type="checkbox"
-          id="sortlocation"
-          onChange={getUserLocation}
-          checked={sortByLocation}
-        ></input>
-        <label style={{ marginLeft: "1vw" }} htmlFor="sortlocation">
-          Sort results by my location
-        </label>
-      </CheckboxStyle>
-      {cloudLocations}
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          <CheckboxStyle>
+            <input
+              type="checkbox"
+              id="sortlocation"
+              onChange={getUserCoordinates}
+              checked={sortByLocation}
+            ></input>
+            <label style={{ marginLeft: "1vw" }} htmlFor="sortlocation">
+              Sort results by my location
+            </label>
+          </CheckboxStyle>
+          {errorMessage}
+          {dataCenterTable}
+        </>
+      )}
     </div>
   );
 }
