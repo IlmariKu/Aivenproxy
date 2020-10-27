@@ -7,13 +7,16 @@ import subprocess
 
 commands = {
     "build_backend": "docker build -t aivenproxy_backend .",
-    "run_backend_dev": "docker run -v " + os.getcwd() + "/backend:/app -p 80:80 aivenproxy_backend /start-reload.sh"
+    "build_frontend": "npm i",
+    "run_backend_dev": "docker run -v " + os.getcwd() + "/backend:/app -p 80:80 aivenproxy_backend /start-reload.sh",
+    "start_frontend": "npm start"
 }
 
 command_names = {
     "build_backend": "Build backend",
+    "build_frontend": "Install frontend dependencies",
     "run_backend_dev": "Run backend (development)",
-    "start_frontend": "npm start"
+    "start_frontend": "Run frontend (development)"
 }
 
 def check_input_for_errors(select):
