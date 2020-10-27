@@ -45,7 +45,7 @@ export function FilterClouds(props) {
 
     return (
       <div style={{ marginLeft: "4vh" }}>
-        <h3 style={{ textAlign: "center" }}>{providerName}</h3>
+        <h3 style={{ textAlign: "center" }}>{props.cloudProviders[providerName]["name"]}</h3>
         {tableRows}
       </div>
     );

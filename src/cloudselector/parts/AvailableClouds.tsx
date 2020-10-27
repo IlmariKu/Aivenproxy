@@ -88,16 +88,28 @@ export function AvailableClouds(props) {
 
   return (
     <div style={{ marginTop: "10vh" }}>
-      <SorterButton onClick={getUserLocation}>Sort by my location</SorterButton>
+      <CheckboxStyle>
+        <input
+          type="checkbox"
+          id="sortlocation"
+          onChange={getUserLocation}
+          checked={sortByLocation}
+        ></input>
+        <label style={{ marginLeft: "1vw" }} htmlFor="sortlocation">
+          Sort results by my location
+        </label>
+      </CheckboxStyle>
       {cloudLocations}
     </div>
   );
 }
 
-const SorterButton = styled.div`
-  width: 200px;
-  border: solid;
-  cursor: pointer;
-  height: 100px;
-  background-color: orange;
+const CheckboxStyle = styled.div`
+  input[type="checkbox"] {
+    transform: scale(2, 2);
+  }
+`;
+
+const CloudProvividerTable = styled.table`
+  margin-top: 2vh;
 `;
