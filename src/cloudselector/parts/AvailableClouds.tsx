@@ -1,12 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { getCloudProvider } from "~/src/cloudselector/utils/cloudnameparser";
-import { isEmpty } from "lodash";
+import { isEmpty, sortBy } from "lodash";
 import styled from "styled-components";
 
 export function AvailableClouds(props) {
+    const [errorMessage, setErrorMessage] = useState("");
+    const [sortByLocation, setSortByLocation] = useState(false);
+    const [cloudLocations, setCloudLocations] = useState([]);
+    const [myLatitude, setMyLatitude] = useState(null);
+    const [myLongitude, setMyLongitude] = useState(null);
+
   function successLocation(position) {
-    console.log(position.coords.latitude);
-    console.log(position.coords.longitude);
+      setMyLatitude(position.coords.latitude)
+      setMyLongitude(position.coords.longitude)
+      setSortByLocation(!sortByLocation)
   }
 
     function distanceTo(lat1, lon1, lat2, lon2) {
@@ -24,8 +31,16 @@ export function AvailableClouds(props) {
         return dist * 1.609344
     }
 
+function sortResultsByDistance(results, myLat, myLon){
+    const resultsWithDistance = results.map((location) => {
+        location["distance"] = distanceTo(myLat, myLon, location["geo_latitude"], location["geo_longitude"])
+        return location
+    })
+    return sortBy(resultsWithDistance, "distance")
+}
+
   function denyLocation() {
-    console.log("Ei ole mahdollista ottaa sijaintiasi.");
+    console.error("Its not possible to fetch your location");
   }
 
   function getUserLocation() {
@@ -33,33 +48,44 @@ export function AvailableClouds(props) {
     geo.getCurrentPosition(successLocation, denyLocation);
   }
 
-  function isRegionBanned(cloudname, region) {
-    const provider = getCloudProvider(cloudname);
-    const bannedRegions = props.cloudProviders[provider]["bannedRegions"];
-    if (bannedRegions.includes(region)) {
-      return true;
-    }
-    return false;
+  function createLocationRows(allTheClouds){
+    const allClouds = allTheClouds.map((cloud) => {
+        return (
+          <tr style={{ textAlign: "left" }}>
+            <th>{cloud["cloud_description"]}</th>
+            <th>{cloud["cloud_name"]}</th>
+          </tr>
+        );
+      })
+
+    return (
+    <table>
+        <tbody>
+          {allClouds}
+        </tbody>
+      </table>
+      )
   }
+
+  useEffect(() => {
+    if (!isEmpty(props.allClouds)){
+        console.log("triggeröity")
+        let rows;
+        if (sortByLocation){
+            rows = createLocationRows(
+                sortResultsByDistance(props.allClouds, myLatitude, myLongitude)
+                )
+        } else {
+            rows = createLocationRows(props.allClouds)
+        }
+       setCloudLocations(rows)
+    }
+  }, [sortByLocation, props.allClouds])
 
   return (
     <div style={{ marginTop: "10vh" }}>
       <SorterButton onClick={getUserLocation}>Sort by my location</SorterButton>
-      <table>
-        <tbody>
-          {props.allClouds.map((cloud) => {
-            if (isRegionBanned(cloud["cloud_name"], cloud["geo_region"])) {
-              return;
-            }
-            return (
-              <tr style={{ textAlign: "left" }}>
-                <th>{cloud["cloud_description"]}</th>
-                <th>{cloud["cloud_name"]}</th>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+        {cloudLocations}
     </div>
   );
 }
@@ -67,6 +93,7 @@ export function AvailableClouds(props) {
 const SorterButton = styled.div`
   width: 200px;
   border: solid;
+  cursor: pointer;
   height: 100px;
   background-color: orange;
 `;
