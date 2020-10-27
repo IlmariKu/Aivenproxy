@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import { Header } from "./parts/Header";
 import { FilterClouds } from "./parts/FilterClouds";
 import { AvailableClouds } from "./parts/AvailableClouds";
-import { mockClouds } from "~/mockclouds.js";
+import { api_get } from "~/src/utils/api.ts";
 import { getCloudProvider, getCloudName } from "~/src/cloudselector/utils/cloudnameparser";
+
+const PROXY_URL = "http://localhost/get_clouds"
 
 export function CloudSelector(props) {
   const [allClouds, setAllClouds] = useState([]);
@@ -30,6 +31,12 @@ export function CloudSelector(props) {
     setCloudProviders(cloudProvs);
   }
 
+  async function fetchAvailableClouds(){
+    const clouds = await api_get(PROXY_URL)
+    parseCloudProviders(clouds["clouds"]);
+    setAllClouds(clouds["clouds"]);
+  }
+
 
   function isCloudLocationBanned(cloud){
     const cloudname = cloud["cloud_name"]
@@ -40,16 +47,10 @@ export function CloudSelector(props) {
         return false;
       }
       return true;
-
   }
 
   useEffect(() => {
-    // Using mock-data for now
-    if (mockClouds) {
-      const clouds = mockClouds.clouds;
-      parseCloudProviders(clouds);
-      setAllClouds(clouds);
-    }
+    fetchAvailableClouds()
   }, []);
 
   useEffect(() => {
