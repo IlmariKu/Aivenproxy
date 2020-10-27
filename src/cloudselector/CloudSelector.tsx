@@ -8,6 +8,7 @@ import { getCloudProvider, getCloudName } from "~/src/cloudselector/utils/cloudn
 
 export function CloudSelector(props) {
   const [allClouds, setAllClouds] = useState([]);
+  const [filteredClouds, setFilteredClouds] = useState([]);
   const [cloudProviders, setCloudProviders] = useState({});
 
   function parseCloudProviders(clouds) {
@@ -29,6 +30,19 @@ export function CloudSelector(props) {
     setCloudProviders(cloudProvs);
   }
 
+
+  function isCloudLocationBanned(cloud){
+    const cloudname = cloud["cloud_name"]
+    const region = cloud["geo_region"]
+      const provider = getCloudProvider(cloudname);
+      const bannedRegions = cloudProviders[provider]["bannedRegions"];
+      if (bannedRegions.includes(region)) {
+        return false;
+      }
+      return true;
+
+  }
+
   useEffect(() => {
     // Using mock-data for now
     if (mockClouds) {
@@ -38,6 +52,11 @@ export function CloudSelector(props) {
     }
   }, []);
 
+  useEffect(() => {
+    const filtered = allClouds.filter(cloud => isCloudLocationBanned(cloud))
+    setFilteredClouds(filtered)
+  }, [cloudProviders]);
+
   return (
     <div>
       <Header />
@@ -46,7 +65,7 @@ export function CloudSelector(props) {
           cloudProviders={cloudProviders}
           setCloudProviders={setCloudProviders}
         />
-        <AvailableClouds allClouds={allClouds} cloudProviders={cloudProviders}/>
+        <AvailableClouds allClouds={filteredClouds} />
       </div>
     </div>
   );
