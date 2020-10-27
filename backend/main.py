@@ -2,5 +2,5 @@ from fastapi import FastAPI
 app = FastAPI()
 
 @app.get("/")
-def read_root():
-    return {"Hello": "shitsworld"}
+def say_hello():
+    return {"Hello": "Aiven"}
