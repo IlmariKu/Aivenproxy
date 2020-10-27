@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { getCloudProvider } from "~/src/cloudselector/utils/cloudnameparser";
 import { isEmpty, sortBy } from "lodash";
 import styled from "styled-components";
 
@@ -30,7 +29,7 @@ export function AvailableClouds(props) {
     dist = Math.acos(dist);
     dist = (dist * 180) / Math.PI;
     dist = dist * 60 * 1.1515;
-    return dist * 1.609344;
+    return Math.round(dist * 1.609344);
   }
 
   function sortResultsByDistance(results, myLat, myLon) {
@@ -58,17 +57,25 @@ export function AvailableClouds(props) {
   function createLocationRows(allTheClouds) {
     const allClouds = allTheClouds.map((cloud) => {
       return (
-        <tr style={{ textAlign: "left" }}>
-          <th>{cloud["cloud_description"]}</th>
-          <th>{cloud["cloud_name"]}</th>
+        <tr>
+          <td>{cloud["cloud_description"]}</td>
+          <td>{cloud["cloud_name"]}</td>
+          <td>{cloud?.["distance"] ?? null}</td>
         </tr>
       );
     });
 
     return (
-      <table>
-        <tbody>{allClouds}</tbody>
-      </table>
+      <CloudProvividerTable>
+        <tbody>
+          <tr style={{"textAlign": "left"}}>
+            <th>Description</th>
+            <th>Region name</th>
+            <th>Distance</th>
+          </tr>
+          {allClouds}
+          </tbody>
+      </CloudProvividerTable>
     );
   }
 
