@@ -29,23 +29,21 @@ export function FilterClouds(props) {
   function createTable(providerName: string, clouds) {
     const tableRows = clouds[providerName]["regions"].map((region) => {
       return (
-        <div key={`${providerName}_${region}`}>
-          <>
-            <CloudButton
-              onClick={() => banUnbanProvider(clouds, providerName, region)}
-              banned={clouds[providerName]["bannedRegions"].includes(region)}
-              key={region}
-            >
-              {region}
-            </CloudButton>
-          </>
-        </div>
+        <CloudButton
+          onClick={() => banUnbanProvider(clouds, providerName, region)}
+          banned={clouds[providerName]["bannedRegions"].includes(region)}
+          key={`${providerName}_${region}`}
+        >
+          {region}
+        </CloudButton>
       );
     });
 
     return (
-      <div style={{ marginLeft: "4vh" }}>
-        <h3 style={{ textAlign: "center" }}>{props.cloudProviders[providerName]["name"]}</h3>
+      <div key={`${providerName}_table`} style={{ marginLeft: "4vh" }}>
+        <h3 style={{ textAlign: "center" }}>
+          {props.cloudProviders[providerName]["name"]}
+        </h3>
         {tableRows}
       </div>
     );

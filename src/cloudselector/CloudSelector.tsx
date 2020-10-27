@@ -31,7 +31,6 @@ export function CloudSelector(props) {
         cloudProvs[cloudAlias]["regions"].push(region);
       }
     });
-    console.log(cloudProvs);
     setCloudProviders(cloudProvs);
   }
 

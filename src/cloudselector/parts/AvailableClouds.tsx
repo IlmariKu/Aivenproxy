@@ -57,7 +57,7 @@ export function AvailableClouds(props) {
   function createLocationRows(allTheClouds) {
     const allClouds = allTheClouds.map((cloud) => {
       return (
-        <tr>
+        <tr key={`${cloud["cloud_name"]}`}>
           <td>{cloud["cloud_description"]}</td>
           <td>{cloud["cloud_name"]}</td>
           <td>{cloud?.["distance"] ?? null}</td>
