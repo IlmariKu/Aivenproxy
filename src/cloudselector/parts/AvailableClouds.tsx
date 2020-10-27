@@ -85,13 +85,8 @@ export function AvailableClouds(props) {
     }
   }, [sortByLocation, props.allClouds]);
 
-  return (
-    <div style={{ marginTop: "10vh" }}>
-      {loading ? (
-        <div>Loading...</div>
-      ) : (
-        <>
-          <CheckboxStyle>
+  const sortResultsCheckbox = (
+    <CheckboxStyle>
             <input
               type="checkbox"
               id="sortlocation"
@@ -102,6 +97,15 @@ export function AvailableClouds(props) {
               Sort results by my location
             </label>
           </CheckboxStyle>
+  )
+
+  return (
+    <div style={{ marginTop: "10vh" }}>
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <>
+          {sortResultsCheckbox}
           {errorMessage}
           {dataCenterTable}
         </>
