@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { pull } from "lodash";
 
 export function FilterClouds(props) {
-  const [cloudButtons, setCloudButtons] = useState([]);
+  const [cloudProviderHTML, setCloudProviderHTML] = useState([]);
 
   function banUnbanRegion(clouds, provider, region) {
     let newcloud = { ...clouds };
@@ -15,7 +15,7 @@ export function FilterClouds(props) {
     props.setCloudProviders(newcloud);
   }
 
-  function createRegionTables(clouds) {
+  function createCloudProviderHTML(clouds) {
     const cloudProviders = Object.keys(clouds);
     return (
       <StyledColumns>
@@ -51,12 +51,13 @@ export function FilterClouds(props) {
 
   useEffect(() => {
     if (props.cloudProviders) {
-      const cloudTable = createRegionTables(props.cloudProviders);
-      setCloudButtons(cloudTable);
+      setCloudProviderHTML(
+        createCloudProviderHTML(props.cloudProviders)
+        )
     }
   }, [props.cloudProviders]);
 
-  return <div>{cloudButtons}</div>;
+  return <div>{cloudProviderHTML}</div>;
 }
 
 const StyledColumns = styled.div`
