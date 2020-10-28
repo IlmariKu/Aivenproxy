@@ -5,7 +5,7 @@ import { pull } from "lodash";
 export function FilterClouds(props) {
   const [cloudButtons, setCloudButtons] = useState([]);
 
-  function banUnbanProvider(clouds, provider, region) {
+  function banUnbanRegion(clouds, provider, region) {
     let newcloud = { ...clouds };
     if (clouds[provider]["bannedRegions"].includes(region)) {
       pull(clouds[provider]["bannedRegions"], region);
@@ -20,17 +20,17 @@ export function FilterClouds(props) {
     return (
       <StyledColumns>
         {cloudProviders.map((provider) => {
-          return createTable(provider, clouds);
+          return createCloudProviderColumn(provider, clouds);
         })}
       </StyledColumns>
     );
   }
 
-  function createTable(providerName: string, clouds) {
+  function createCloudProviderColumn(providerName: string, clouds) {
     const tableRows = clouds[providerName]["regions"].map((region) => {
       return (
         <CloudButton
-          onClick={() => banUnbanProvider(clouds, providerName, region)}
+          onClick={() => banUnbanRegion(clouds, providerName, region)}
           banned={clouds[providerName]["bannedRegions"].includes(region)}
           key={`${providerName}_${region}`}
         >
